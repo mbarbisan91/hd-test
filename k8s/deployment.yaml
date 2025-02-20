@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: my-go-app
-          image: gcr.io/my-holded-test-project/my-go-app:latest
+          image: europe-docker.pkg.dev/my-holded-test-project/my-go-app/my-go-app:latest
           ports:
             - containerPort: 8080
 ---

@@ -75,7 +75,7 @@ spec:
           service:
             name: my-go-app
             port:
-              number: 443
+              number: 8080
   tls:
   - hosts:
     - "my-go-app.example.com"

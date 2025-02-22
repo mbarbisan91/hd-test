@@ -66,7 +66,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   rules:
-  - host: "*"
+  - host: "my-go-app.example.com"
     http:
       paths:
       - path: /
@@ -78,5 +78,5 @@ spec:
               number: 443
   tls:
   - hosts:
-    - "*"
+    - "my-go-app.example.com"
     secretName: my-go-app-tls

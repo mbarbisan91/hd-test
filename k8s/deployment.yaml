@@ -1,64 +1,28 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
-  name: my-go-app-stable
+  name: my-go-app
   labels:
     app: my-go-app
-    track: stable
 spec:
-  replicas: 2
+  replicas: 3  # Total replicas (stable + canary)
   selector:
     matchLabels:
       app: my-go-app
-      track: stable
-  template:
-    metadata:
-      labels:
-        app: my-go-app
-        track: stable
-    spec:
-      containers:
-        - name: my-go-app
-          image: europe-docker.pkg.dev/my-holded-test-project/my-go-app/my-go-app:latest
-          ports:
-            - containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 20
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-go-app-canary
-  labels:
-    app: my-go-app
-    track: canary
-spec:
-  replicas: 1 
-  selector:
-    matchLabels:
-      app: my-go-app
-      track: canary
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1 
-      maxUnavailable: 0 
+    canary:
+      steps:
+        - setWeight: 10  # 10% de las réplicas serán canary
+        - pause: {}  # Pausa para verificar el estado del canary
+        - setWeight: 50  # Si el canary está correcto, sube al 50%
+        - pause: {}  # Pausa para verificar el estado
+        - setWeight: 100  # Finaliza el rollout con el 100%
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
         app: my-go-app
-        track: canary
     spec:
       containers:
         - name: my-go-app
@@ -91,6 +55,7 @@ spec:
       port: 443
       targetPort: 8080
   type: LoadBalancer
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

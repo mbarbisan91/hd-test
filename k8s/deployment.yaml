@@ -12,11 +12,11 @@ spec:
   strategy:
     canary:
       steps:
-        - setWeight: 10  # 10% de las réplicas serán canary
-        - pause: {}  # Pausa para verificar el estado del canary
-        - setWeight: 50  # Si el canary está correcto, sube al 50%
+        - setWeight: 10  # 10% para el canary
         - pause: {}  # Pausa para verificar el estado
-        - setWeight: 100  # Finaliza el rollout con el 100%
+        - setWeight: 50  # Si el canary es correcto, sube al 50%
+        - pause: {}  # Pausa para verificar el estado
+        - setWeight: 100  # Finaliza el rollout con 100%
       maxSurge: 1
       maxUnavailable: 0
   template:

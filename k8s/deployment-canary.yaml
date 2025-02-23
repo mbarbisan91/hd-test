@@ -62,6 +62,30 @@ spec:
     app: my-go-app
   ports:
     - protocol: TCP
-      port: 8080 
+      port: 443
       targetPort: 8080  
   type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-go-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+  - host: "my-go-app.example.com"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-go-app
+            port:
+              number: 443
+  tls:
+  - hosts:
+    - "my-go-app.example.com"
+    secretName: my-go-app-tls

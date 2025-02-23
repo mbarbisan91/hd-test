@@ -5,18 +5,18 @@ metadata:
   labels:
     app: my-go-app
 spec:
-  replicas: 3  # Total replicas (stable + canary)
+  replicas: 3 
   selector:
     matchLabels:
       app: my-go-app
   strategy:
     canary:
       steps:
-        - setWeight: 10  # 10% para el canary
-        - pause: {}  # Pausa para verificar el estado
-        - setWeight: 50  # Si el canary es correcto, sube al 50%
-        - pause: {}  # Pausa para verificar el estado
-        - setWeight: 100  # Finaliza el rollout con 100%
+        - setWeight: 10 
+        - pause: {} 
+        - setWeight: 50  
+        - pause: {}  
+        - setWeight: 100 
       maxSurge: 1
       maxUnavailable: 0
   template:
@@ -52,54 +52,31 @@ spec:
     app: my-go-app
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
-  # Eliminamos LoadBalancer, ya que Istio manejará el enrutamiento
-  type: ClusterIP
+      port: 443 
+      targetPort: 8080  
+  type: LoadBalancer
 
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: my-go-app-gateway
+  name: my-go-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
-  selector:
-    istio: ingressgateway  # Asegura que el Gateway de Istio se use
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "my-go-app.example.com"  # Cambia esto a tu dominio real
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    hosts:
-    - "my-go-app.example.com"  # Cambia esto a tu dominio real
-    tls:
-      mode: SIMPLE
-      credentialName: my-go-app-tls  # El nombre del secreto TLS
-      privateKey: sds
-      serverCertificate: sds
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: my-go-app-virtualservice
-spec:
-  hosts:
-  - "my-go-app.example.com"
-  gateways:
-  - my-go-app-gateway  # Se asocia con el Gateway de Istio
-  http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        host: my-go-app
-        port:
-          number: 8080
+  rules:
+  - host: "my-go-app.example.com"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-go-app
+            port:
+              number: 8080
+  tls:
+  - hosts:
+    - "my-go-app.example.com"
+    secretName: my-go-app-tls

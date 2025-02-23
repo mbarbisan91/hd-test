@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-go-app
+  name: my-go-app-legacy
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: my-go-app
+      app: my-go-app-legacy
   template:
     metadata:
       labels:
-        app: my-go-app
+        app: my-go-app-legacy
     spec:
       containers:
-        - name: my-go-app
+        - name: my-go-app-legacy
           image: europe-docker.pkg.dev/my-holded-test-project/my-go-app/my-go-app:latest
           ports:
             - containerPort: 8080
@@ -33,10 +33,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-go-app
+  name: my-go-app-legacy
 spec:
   selector:
-    app: my-go-app
+    app: my-go-app-legacy
   ports:
     - protocol: TCP
       port: 443
